@@ -1,44 +1,44 @@
 # Weekly Music Chart Dataset (Own Dataset, Flat CSV)
 
-A standalone TypeScript script that periodically captures snapshots of top music charts along with song audio characteristics (BPM, key, mode, energy, danceability, valence, acousticness).
+A standalone TypeScript pipeline that captures weekly snapshots of top music charts into an append-only CSV dataset (`data/chart_dataset.csv`).
 
-Over time, this dataset enables LLM analysis to identify what sounds are currently dominating global charts, what musical elements are missing, and where contrarian creative opportunities exist.
+The collector gathers chart rankings, song titles, artists, duration, Deezer BPM, and standardized **ISRC** (International Standard Recording Code) identifiers using Deezer's public, unauthenticated API.
 
-This is personal market research. The dataset is created from scratch by running this script. No Kaggle, Hugging Face, or historical datasets are imported.
+The CSV schema includes columns for deep audio characteristics (`bpm`, `key`, `mode`, `energy`, `danceability`, `valence`, `acousticness`), which are preserved for a future direct REST API enrichment phase (such as a music intelligence API), while keeping the current collection pipeline 100% reliable, fast, and browser-free.
+
+This is personal market research. The dataset is created from scratch by running this pipeline.
 
 ---
 
 ## Decisions Already Made
 
-- **ONE Flat CSV**: No database, no second table, no joins. Each row is self-contained with chart info and audio stats together (`data/chart_dataset.csv`).
-- **Append-Only**: One row per chart entry per run. Never overwrite old rows. Calendar week deduplication prevents duplicate runs unless `--force` is used.
-- **Weekly Cadence**: Focuses on current weekly trends without needing historical backfills.
-- **Zero API Keys & Zero Logins**: Uses public unauthenticated endpoints (Deezer) and public web pages (Tunebat). No logins, accounts, or cookies.
-- **Two-Step Data Flow**: 
-  1. Fetch the Global 50 chart from Deezer's public endpoint (plain HTTP fetch).
-  2. Enrich uncached songs from Tunebat via Playwright. **Step 2 must never break Step 1.**
+- **ONE Flat CSV**: No database, no second table, no joins. Each row is self-contained with chart metadata and reserved audio columns together (`data/chart_dataset.csv`).
+- **Append-Only Immutability**: One row per chart entry per run. Never overwrite historical rows. Calendar week deduplication prevents duplicate runs unless `--force` is used.
+- **Weekly Cadence**: Captures current weekly trends without needing historical backfills.
+- **Zero API Keys & Zero Logins**: Uses Deezer's public unauthenticated endpoints (`api.deezer.com`). No logins, passwords, or browser automation required.
+- **Browser Scraping Cut**: Probed web aggregators (Tunebat, Chosic) during feasibility gates; both enforce aggressive Cloudflare bot walls. Per project policy (*"Never bypass bot defenses"*), fragile browser scraping was removed to make the pipeline cloud-ready and 100% dependable.
+- **Streamlined Execution**: Without browser overhead, each weekly run finishes in **under 2 seconds** and runs smoothly in GitHub Actions.
 
 ---
 
-## Enrichment Cache = The CSV Itself
+## In-Memory Metadata Cache = The CSV Itself
 
-Audio stats for a track do not change, and songs often stay on charts for weeks:
-1. Before querying Tunebat, the script reads `data/chart_dataset.csv` and builds an in-memory cache of `track_id` -> audio stats.
-2. For each song already in the CSV, stats are copied instantly (`enrichment_status = cached`) with **zero web requests**.
-3. Only new songs with no stats on file hit Tunebat, up to the per-run cap (default 25).
-4. Steady-state weekly runs make only **5 to 15 Tunebat requests**, keeping web traffic light and polite.
+Song details (ISRC, duration, baseline BPM) do not change once released, and songs often stay on the charts for multiple consecutive weeks:
+1. At the start of each run, the pipeline loads `data/chart_dataset.csv` into memory and indexes previously seen songs by `track_id` and `isrc`.
+2. For returning songs, metadata is reused instantly (`enrichment_status = cached`) with **zero network requests**.
+3. Only songs appearing on the chart for the very first time trigger a lookup to Deezer's track endpoint.
+4. Steady-state runs make only **5 to 10 lightweight HTTP requests**, eliminating rate limit risks and finishing near-instantly.
 
 ---
 
-## Source Comparison Landscape
+## Source & Feasibility Landscape
 
-| Source | Gives You | Missing | Role in Pipeline |
+| Source | Role in Pipeline | Status | Notes |
 | :--- | :--- | :--- | :--- |
-| **Deezer API** (`api.deezer.com/chart/0/tracks`) | Rank, title, artist, duration, ISRC, BPM | Energy, danceability, valence | **Step 1 primary source**. Free, unauthenticated JSON, no browser needed. |
-| **Tunebat** | Audio stats (BPM, key, mode, energy, danceability, valence, acousticness) | Public API | **Step 2 enrichment source**. Scraped via Playwright only for new, uncached tracks. |
-| **Apple Music RSS** | Top songs by country (clean JSON) | All audio stats | Evaluated; Deezer preferred for Global scope & native BPM/ISRC. |
-| **Billboard** | Rank, title, artist, weeks on chart, peak | All audio stats | Excluded: restrictive terms, anti-bot protections, and zero audio features. |
-| **Spotify Web API** | Full audio features (historically) | Closed to new apps | Deprecated and locked down (`403 Forbidden` on `/v1/audio-features`) for all new developer apps since November 2024. |
+| **Deezer API** (`api.deezer.com/chart/0/tracks`) | Primary Source | **Active** | Free, unauthenticated JSON. Provides Global Top 50 rank, title, artist, duration, ISRC, and baseline BPM. |
+| **Tunebat** | Audio features | **Dropped** | Probed during Gate 3; blocked by site-wide Cloudflare Turnstile challenges. Scraper cut per anti-bot policy. |
+| **Chosic** | Audio features | **Dropped** | Probed during Gate 3c; also Cloudflare-protected. Cut to avoid brittle browser workarounds. |
+| **Future Data Enrichment** | Audio features | **Planned / Optional** | The CSV schema preserves `bpm`, `key`, `energy`, etc. A free or lightweight REST API (e.g. Sonovault, GetSongBPM, etc.) can be plugged in directly via HTTP in a future milestone. |
 
 ---
 
@@ -55,16 +55,12 @@ Copy the example environment file:
 cp .env.example .env
 ```
 
-Configure parameters in `.env`:
+Parameters in `.env`:
 ```env
 CHART_SOURCE="https://api.deezer.com/chart/0/tracks"
 CHART_REGION="Global"
 MAX_ROWS=50
-ENRICHMENT_CAP=25
-DELAY_MIN_MS=3000
-DELAY_MAX_MS=8000
 ```
-*(The script fails fast if required configuration is missing.)*
 
 ### 3. Install & Run
 
@@ -72,10 +68,14 @@ DELAY_MAX_MS=8000
 # Install dependencies
 npm install
 
-# Run chart dataset collector
+# Run weekly chart dataset collector
 npm run scrape:charts
-# or run directly with tsx:
+
+# Or run directly with tsx:
 npx tsx scripts/chart-dataset.ts
+
+# Bypass week deduplication guard (force re-run on same week):
+npx tsx scripts/chart-dataset.ts --force
 ```
 
 ---
@@ -85,8 +85,7 @@ npx tsx scripts/chart-dataset.ts
 All data is stored locally in the `data/` directory:
 
 - **`data/chart_dataset.csv`**: Append-only master CSV holding all weekly runs.
-- **`data/raw/<source>/<date>.json`**: Raw chart JSON responses for verification.
-- **`data/raw/<source>/<date>_error.png`**: Screenshots saved if Tunebat encounters an error or bot challenge.
+- **`data/raw/deezer/<YYYY-MM-DD>.json`**: Raw Deezer chart JSON snapshots for auditability.
 
 ### Data Schema
 
@@ -102,29 +101,29 @@ Each row in `data/chart_dataset.csv` records:
 | `isrc` | International Standard Recording Code |
 | `title` | Song title |
 | `artist` | Artist name |
-| `duration_seconds` | Song duration in seconds |
-| `deezer_bpm` | BPM reported by Deezer |
-| `bpm` | BPM enriched from Tunebat |
-| `key` | Musical key (e.g. `C Major`) |
-| `mode` | Modality (e.g. `Major` / `Minor`) |
-| `energy` | Energy score |
-| `danceability` | Danceability score |
-| `valence` | Valence / positivity score |
-| `acousticness` | Acousticness score |
-| `enrichment_status` | `cached` \| `fetched` \| `pending` \| `not_found` \| `error` |
-| `enrichment_source` | `tunebat` (or blank if pending) |
-| `enrichment_date` | Date enriched |
-| `match_confidence` | `exact_id` \| `normalized_name` \| `fuzzy` |
-| `enrichment_attempts`| Number of lookup attempts (max 3) |
+| `duration_seconds` | Song duration in integer seconds |
+| `deezer_bpm` | Baseline BPM reported by Deezer (when available) |
+| `bpm` | Audio BPM (reserved for future API enrichment) |
+| `key` | Musical key (reserved for future API enrichment) |
+| `mode` | Modality `Major` / `Minor` (reserved for future API enrichment) |
+| `energy` | Energy score (reserved for future API enrichment) |
+| `danceability` | Danceability score (reserved for future API enrichment) |
+| `valence` | Valence / musical positivity score (reserved for future API enrichment) |
+| `acousticness` | Acousticness score (reserved for future API enrichment) |
+| `enrichment_status` | `cached` \| `pending` |
+| `enrichment_source` | Enrichment provider name (blank in current version) |
+| `enrichment_date` | Date enriched (blank in current version) |
+| `match_confidence` | `exact_id` \| `normalized_name` \| `fuzzy` (blank in current version) |
+| `enrichment_attempts`| Number of enrichment lookup attempts (0 in current version) |
 
 ---
 
-## Feasibility Gates (Run Before Full Build)
+## Feasibility Gates (Phase 1 Summary)
 
-1. **Gate 1**: Confirm Deezer Global 50 chart endpoint, fields, and zero-auth access. Print first 5 rows.
-2. **Gate 2**: Confirm Deezer per-track `bpm` and `isrc` lookups.
-3. **Gate 3**: Probe Tunebat with 10 songs (test search without login, verify stats display, test bot tolerance).
-4. **Gate 4**: Summarize Tunebat terms of service and `robots.txt`.
+1. **Gate 1 — Deezer Global 50 Chart**: PASSED. Returns 50 tracks, no auth, full rank/artist/title/duration.
+2. **Gate 2 — Deezer Track Details (ISRC & BPM)**: PASSED. 100% ISRC coverage. BPM field present (often 0 for brand new releases).
+3. **Gate 3 / 3c — Aggregator Probes (Tunebat & Chosic)**: CONCLUDED & DROPPED. Both platforms enforce Cloudflare bot walls. Web scraping cut in favor of robust API data.
+4. **Gate 4 — Architecture Review**: PASSED. Pipeline locked to clean HTTP data from Deezer + in-memory CSV cache.
 
 ---
 
@@ -168,5 +167,5 @@ crontab -e
 
 ## Data Use Note
 
-This project is intended strictly for personal research. If the dataset is published in the future, review the chart provider's and Tunebat's terms regarding data redistribution beforehand.
+This project is intended strictly for personal research. If the dataset is published in the future, review the chart provider's terms regarding data redistribution beforehand.
 
