@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deezer Top 50 Worldwide</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 28px 16px 60px;
+      background: #2e2d28;
+      color: #211d16;
+      font-family: 'Courier New', monospace;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .paper {
+      max-width: 1050px;
+      margin: auto;
+      padding: 25px;
+      background: #f3edcf;
+      border: 5px double #30291e;
+      box-shadow: 9px 10px 0 #0e0d0b;
+      transform: rotate(-.15deg);
+    }
+
+    .header {
+      text-align: center;
+      /* border-bottom: 4px dashed #30291e; */
+      padding-bottom: 14px;
+    }
+
+    .seal {
+      display: inline-block;
+      border: 4px solid #a1261e;
+      color: #a1261e;
+      padding: 5px 12px;
+      font-weight: bold;
+      transform: rotate(-8deg);
+      font-size: 13px;
+    }
+
+    h1 {
+      margin: 13px 0 3px;
+      font-size: clamp(27px, 5vw, 48px);
+      line-height: 1;
+      text-transform: uppercase;
+      text-shadow: 2px 2px #d5c99d;
+    }
+
+    .subtitle {
+      font-size: 13px;
+    }
+
+    .casefile {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff9df;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      border: 2px solid #30291e;
+      padding: 11px 9px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #d5c99d;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: .04em;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #eee5c4;
+    }
+
+    tbody tr:hover {
+      background: #d5cdb0;
+    }
+
+    .number {
+      font-weight: bold;
+      font-size: 17px;
+    }
+
+    .sample-link {
+      display: inline-block;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .sample-link:hover .mugshot {
+      border-color: #a1261e;
+      background: #f6d4a0;
+      cursor: pointer;
+    }
+
+    .mugshot {
+      width: 74px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      background: #d2c8a7;
+      border: 2px solid #30291e;
+      overflow: hidden;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .mugshot i {
+      display: block;
+      width: 3px;
+      height: var(--h);
+      background: #30291e;
+    }
+
+    .suspect {
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .small {
+      display: block;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    .stamp {
+      display: inline-block;
+      padding: 4px 6px;
+      border: 2px solid #a1261e;
+      color: #a1261e;
+      font-size: 10px;
+      font-weight: bold;
+      transform: rotate(-5deg);
+      white-space: nowrap;
+    }
+
+    .fine {
+      font-weight: bold;
+      color: #a1261e;
+      white-space: nowrap;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 4px dashed #30291e;
+      font-size: 11px;
+    }
+
+    .signature {
+      margin-top: 24px;
+      text-align: right;
+      font-size: 12px;
+    }
+
+    .signature strong {
+      display: inline-block;
+      font-size: 23px;
+      transform: rotate(-7deg);
+      color: #a1261e;
+    }
+
+    @media(max-width:700px) {
+      .paper {
+        padding: 14px 9px;
+      }
+
+      table {
+        font-size: 11px;
+      }
+
+      th,
+      td {
+        padding: 7px 5px;
+      }
+
+      .mugshot {
+        width: 45px;
+      }
+
+      .stamp {
+        font-size: 8px;
+      }
+    }
+
+    .week-divider td {
+      background: #30291e;
+      color: #fff9df;
+      padding: 9px 12px;
+      font-weight: bold;
+      border: 2px solid #30291e;
+    }
+
+    .week-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 13px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .week-title {
+      color: #f3edcf;
+      font-size: 14px;
+    }
+
+    .week-source {
+      color: #d5c99d;
+      font-size: 11px;
+    }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 14px 0 10px;
+      padding: 8px 12px;
+      background: #e7dcae;
+      border: 2px solid #30291e;
+      font-size: 12px;
+    }
+
+    .table-controls select {
+      background: #fff9df;
+      color: #211d16;
+      border: 2px solid #30291e;
+      padding: 4px 8px;
+      font-family: inherit;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="paper">
+    <header class="header">
+      <div class="seal" style="font-size: 30px;">Deezer's</div>
+      <h1>Normal Music</h1>
+      <div class="subtitle">Deezer's Top 50 Worldwide · Form N-432</div>
+    </header>
+
+    <div class="table-controls">
+      <div>
+        <label for="week-filter"><strong>VIEW WEEK:</strong> </label>
+        <select id="week-filter">
+          <option value="all">All Weeks (Loading...)</option>
+        </select>
+      </div>
+      <div id="dataset-summary">
+        Loading dataset...
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Sample</th>
+          <th>Title</th>
+          <th>Artist</th>
+          <th>Duration</th>
+          <th>Tempo</th>
+          <th>ISRC / Track ID</th>
+          <th>Enrichment</th>
+        </tr>
+      </thead>
+      <tbody id="chart-table-body">
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 24px;">Loading chart dataset...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <span>IMPORTANT: THIS IS THE END. BUT WE'LL BE BACK WITH MORE.</span>
+      <span>FORM N-432 · PAGE 1 OF 1</span>
+    </div>
+    <div class="signature">
+      Authorized by the World Wide Web<br>
+      <strong>D. Schraedel</strong><br>
+      <span class="small">Music Critic</span>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      function parseCSV(text) {
+        const lines = [];
+        let row = [''];
+        let inQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+          const c = text[i];
+          const next = text[i + 1];
+          if (c === '"') {
+            if (inQuotes && next === '"') {
+              row[row.length - 1] += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (c === ',' && !inQuotes) {
+            row.push('');
+          } else if ((c === '\r' || c === '\n') && !inQuotes) {
+            if (c === '\r' && next === '\n') i++;
+            if (row.length > 1 || row[0] !== '') lines.push(row);
+            row = [''];
+          } else {
+            row[row.length - 1] += c;
+          }
+        }
+        if (row.length > 1 || row[0] !== '') lines.push(row);
+        if (lines.length === 0) return [];
+        const headers = lines[0].map(h => h.trim());
+        return lines.slice(1).map(cols => {
+          const obj = {};
+          headers.forEach((h, idx) => {
+            obj[h] = (cols[idx] || '').trim();
+          });
+          return obj;
+        });
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatDuration(sec) {
+        const s = parseInt(sec, 10);
+        if (isNaN(s) || s <= 0) return '—';
+        const m = Math.floor(s / 60);
+        const rem = s % 60;
+        return m + ':' + String(rem).padStart(2, '0');
+      }
+
+      function getWaveformHeights(seedStr) {
+        let hash = 0;
+        const str = String(seedStr || 'track');
+        for (let i = 0; i < str.length; i++) {
+          hash = ((hash << 5) - hash) + str.charCodeAt(i);
+          hash |= 0;
+        }
+        const heights = [];
+        for (let i = 0; i < 9; i++) {
+          const pseudo = Math.abs(Math.sin(hash + (i + 1) * 1.618) * 40) + 8;
+          heights.push(Math.round(pseudo));
+        }
+        return heights;
+      }
+
+      function getIsoWeek(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return 'Unknown Week';
+        const target = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        const dayNr = target.getUTCDay() || 7;
+        target.setUTCDate(target.getUTCDate() + 4 - dayNr);
+        const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((target - yearStart) / 86400000) + 1) / 7);
+        return target.getUTCFullYear() + '-W' + String(weekNo).padStart(2, '0');
+      }
+
+      function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          timeZone: 'UTC'
+        });
+      }
+
+      function applyFilter() {
+        const weekSelect = document.getElementById('week-filter');
+        if (!weekSelect) return;
+        const selected = weekSelect.value;
+        const rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(tr => {
+          const rowWeek = tr.getAttribute('data-week');
+          if (selected === 'all' || rowWeek === selected) {
+            tr.style.display = '';
+          } else {
+            tr.style.display = 'none';
+          }
+        });
+      }
+
+      function renderDataset(records) {
+        const tbody = document.getElementById('chart-table-body');
+        const weekSelect = document.getElementById('week-filter');
+        const summary = document.getElementById('dataset-summary');
+        if (!tbody) return;
+
+        if (!records || records.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px;">No records found in CSV dataset.</td></tr>';
+          return;
+        }
+
+        // Group records by week in order
+        const weeksMap = new Map();
+        records.forEach(r => {
+          const weekId = getIsoWeek(r.scraped_at);
+          if (!weeksMap.has(weekId)) weeksMap.set(weekId, []);
+          weeksMap.get(weekId).push(r);
+        });
+
+        const weekKeys = Array.from(weeksMap.keys());
+
+        if (weekSelect) {
+          const currentVal = weekSelect.value;
+          weekSelect.innerHTML = '<option value="all">All Weeks (' + records.length + ' tracks)</option>';
+          weekKeys.forEach(w => {
+            const opt = document.createElement('option');
+            opt.value = w;
+            opt.textContent = w + ' (' + weeksMap.get(w).length + ' tracks)';
+            weekSelect.appendChild(opt);
+          });
+          if (currentVal && (currentVal === 'all' || weeksMap.has(currentVal))) {
+            weekSelect.value = currentVal;
+          }
+        }
+
+        if (summary) {
+          summary.textContent = 'Displaying ' + records.length + ' records across ' + weekKeys.length + ' week' + (weekKeys.length > 1 ? 's' : '') + ' (in order)';
+        }
+
+        let html = '';
+        weekKeys.forEach(weekId => {
+          const list = weeksMap.get(weekId);
+          list.sort((a, b) => (parseInt(a.rank, 10) || 0) - (parseInt(b.rank, 10) || 0));
+          const sample = list[0];
+          const formattedDate = formatDate(sample.scraped_at);
+          const chartName = sample.chart || 'Global Top 50';
+
+          html += '<tr class="week-divider" data-week="' + escapeHtml(weekId) + '">';
+          html += '<td colspan="8"><div class="week-banner">';
+          html += '<span class="week-title">' + escapeHtml(weekId) + ' · Week of ' + escapeHtml(formattedDate) + '</span>';
+          html += '<span class="week-source">' + escapeHtml(chartName) + ' · ' + list.length + ' Tracks</span>';
+          html += '</div></td></tr>';
+
+          list.forEach(r => {
+            const rankNum = String(r.rank || '').padStart(3, '0');
+            const heights = getWaveformHeights(r.track_id || r.title);
+            const waveBars = heights.map(h => '<i style="--h:' + h + 'px"></i>').join('');
+            const duration = formatDuration(r.duration_seconds);
+            const bpm = r.deezer_bpm || r.bpm ? parseFloat(r.deezer_bpm || r.bpm).toFixed(1) + ' BPM' : '—';
+            const status = (r.enrichment_status || 'pending').toUpperCase();
+
+            const deezerUrl = r.track_id ? 'https://www.deezer.com/track/' + encodeURIComponent(r.track_id) : '';
+            const sampleCell = deezerUrl
+              ? '<a href="' + deezerUrl + '" target="_blank" rel="noopener noreferrer" title="Listen on Deezer" class="sample-link"><div class="mugshot" aria-label="waveform mugshot">' + waveBars + '</div></a>'
+              : '<div class="mugshot" aria-label="waveform mugshot">' + waveBars + '</div>';
+
+            html += '<tr data-week="' + escapeHtml(weekId) + '">';
+            html += '<td class="number">' + rankNum + '</td>';
+            html += '<td>' + sampleCell + '</td>';
+            html += '<td><span class="suspect">' + escapeHtml(r.title) + '</span></td>';
+            html += '<td>' + escapeHtml(r.artist) + '</td>';
+            html += '<td>' + duration + '<span class="small">' + escapeHtml(r.duration_seconds) + 's</span></td>';
+            html += '<td>' + bpm + '</td>';
+            html += '<td><span>' + escapeHtml(r.isrc || '—') + '</span><span class="small">ID: ' + escapeHtml(r.track_id || '—') + '</span></td>';
+            html += '<td><span class="stamp">' + escapeHtml(status) + '</span></td>';
+            html += '</tr>';
+          });
+        });
+
+        tbody.innerHTML = html;
+        applyFilter();
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        const weekSelect = document.getElementById('week-filter');
+        if (weekSelect) {
+          weekSelect.addEventListener('change', applyFilter);
+        }
+
+        const tbody = document.getElementById('chart-table-body');
+
+        // Dynamically fetch CSV dataset
+        fetch('./data/chart_dataset.csv')
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status + ': Failed to load data/chart_dataset.csv');
+            return res.text();
+          })
+          .then(csvText => {
+            const records = parseCSV(csvText.trim());
+            renderDataset(records);
+          })
+          .catch(err => {
+            if (tbody) {
+              tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #a1261e;">' +
+                '<b>Error loading dataset:</b> ' + escapeHtml(err.message) +
+                '<br><span class="small" style="margin-top: 8px;">Ensure data/chart_dataset.csv is accessible (e.g. served via a local web server).</span>' +
+                '</td></tr>';
+            }
+          });
+      });
+    })();
+  </script>
+</body>
+
+</html>
