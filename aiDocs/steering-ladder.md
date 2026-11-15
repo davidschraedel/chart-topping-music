@@ -47,11 +47,13 @@ Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npx t
 7. **Phase 7: Scheduling & Cloud Automation**: Set up a free weekly GitHub Actions cron workflow to run the pipeline unattended in the cloud and auto-commit `data/chart_dataset.csv` back to the repository (with local macOS `launchd` / `cron` documented as a fallback).
 
 ## 6. State
-- **Current Milestone**: Phase 2 - Chart Fetcher & Base CSV (Complete) -> Ready for Phase 3/4
+- **Current Milestone**: Phase 4 - CSV-as-Cache (Complete) -> Ready for Phase 5 (Diff Report & Error Handling)
 - **Progress**:
   1. **Phase 1 (Feasibility Gates)**: Completed.
-  2. **Phase 2 (Chart Fetcher & Base CSV)**: Completed. Main pipeline implemented in `scripts/chart-dataset.ts`, `src/deezer.ts`, `src/csv.ts`, and `src/types.ts`. Successfully fetched Deezer Global Top 50, saved raw JSON snapshot, applied week-deduplication guard, and written initial 50 rows to `data/chart_dataset.csv`.
-- **Verification**: Pipeline runs cleanly; week deduplication verified (skips repeat run on same week unless `--force`).
+  2. **Phase 2 (Chart Fetcher & Base CSV)**: Completed.
+  3. **Phase 3 (Tunebat Parser Probe)**: Skipped due to site-wide Cloudflare bot blocks.
+  4. **Phase 4 (CSV-as-Cache & Metadata Reuse)**: Completed. Built in-memory metadata cache (`src/cache.ts`) indexed by `track_id` and `isrc`. Verified with repeat run: 50/50 cache hits, skipping redundant Deezer API lookups and achieving near-instant execution.
+- **Verification**: Cache verified with `--force` run (50 hits, 0 misses). CSV remains clean at 50 weekly rows.
 
 ---
 

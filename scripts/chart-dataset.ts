@@ -10,6 +10,7 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 import { fetchDeezerChart } from '../src/deezer';
 import { loadCsv, appendCsv, getIsoWeekId, hasDuplicateWeek } from '../src/csv';
+import { buildCache } from '../src/cache';
 
 dotenv.config();
 
@@ -32,6 +33,12 @@ async function main(): Promise<void> {
   const existingRows = await loadCsv(CSV_PATH);
   console.log(`Existing CSV records loaded: ${existingRows.length}`);
 
+  // Build in-memory metadata cache from existing CSV
+  const cache = buildCache(existingRows);
+  if (cache.size > 0) {
+    console.log(`Metadata cache active: ${cache.size} distinct tracks indexed.`);
+  }
+
   // 2. Week-deduplication guard
   if (!isForce && hasDuplicateWeek(existingRows, currentWeekId, chartSource)) {
     console.log(`\n⏸ Run skipped: Chart data for week "${currentWeekId}" from "${chartSource}" is already present in dataset.`);
@@ -39,9 +46,9 @@ async function main(): Promise<void> {
     return;
   }
 
-  // 3. Fetch Deezer Chart and per-track details (ISRC, BPM)
+  // 3. Fetch Deezer Chart and per-track details (ISRC, BPM), utilizing cache
   console.log('\n--- Step 1: Fetching Chart Data ---');
-  const { entries, rawFilePath } = await fetchDeezerChart();
+  const { entries, rawFilePath, cacheHits, cacheMisses } = await fetchDeezerChart({ cache });
 
   console.log(`Successfully retrieved and validated ${entries.length} chart entries.`);
 
@@ -56,6 +63,8 @@ async function main(): Promise<void> {
   console.log(`Week ID:          ${currentWeekId}`);
   console.log(`Timestamp:        ${entries[0]?.scraped_at || now.toISOString()}`);
   console.log(`Rows Written:     ${entries.length}`);
+  console.log(`Cache Hits:       ${cacheHits}`);
+  console.log(`Fresh Lookups:    ${cacheMisses}`);
   console.log(`Raw Capture:      ${rawFilePath || 'n/a'}`);
   console.log(`Total Dataset:    ${existingRows.length + entries.length} rows`);
 
