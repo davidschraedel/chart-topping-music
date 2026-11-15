@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Deezer Top 50 Worldwide</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Oswald:wght@500;600;700&amp;display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg-desk: #1a1b1e;
+      --paper-bg: #f7f4ed;
+      --ink: #1f1b19;
+      --ink-muted: #6e645d;
+      --border-dark: #262322;
+      --border-subtle: #453c39;
+      --stamp-red: #b23326;
+      --stamp-red-soft: rgba(178, 51, 38, 0.08);
+      --navy-banner: #262322;
+      --navy-banner-text: #f7f2ea;
+      --controls-bg: #322b27;
+      --controls-text: #ece3d3;
+      --controls-select-bg: #f7f4ed;
+      --controls-select-border: #453c39;
+      --row-base: #fcfbf8;
+      --row-alt: #eee6d6;
+      --row-hover: #e5dac7;
+      --mugshot-bg: #e6ded1;
+      --mugshot-hover-bg: #fdf5ea;
+      --mugshot-hover-border: #dfaa6b;
+      --table-border: #262322;
+      --tube-glow: #c97931;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px 80px;
+      background: radial-gradient(circle at 50% 20%, #26262b 0%, #1a1b1e 65%, #101114 100%);
+      color: var(--ink);
+      font-family: 'IBM Plex Mono', 'Courier Prime', monospace;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.4;
+    }
+
+    .paper {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 44px 40px 36px;
+      background-color: var(--paper-bg);
+      border: 3.5px solid var(--border-dark);
+      outline: 1px solid rgba(38, 35, 34, 0.35);
+      outline-offset: -8px;
+      box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.4),
+        10px 14px 0 #0d0e10,
+        18px 24px 38px rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+
+    .paper::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, rgba(38, 35, 34, 0.4) 20%, rgba(178, 51, 38, 0.8) 50%, rgba(38, 35, 34, 0.4) 80%, transparent);
+    }
+
+    .header {
+      text-align: center;
+      padding-bottom: 22px;
+      border-bottom: 2px dashed rgba(38, 35, 34, 0.3);
+      position: relative;
+    }
+
+    .seal {
+      display: inline-block;
+      border: 3px double var(--stamp-red);
+      color: var(--stamp-red);
+      padding: 4px 16px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 24px;
+      font-family: 'Oswald', sans-serif;
+      transform: rotate(-3deg);
+      background: var(--stamp-red-soft);
+      box-shadow: 0 0 0 1px rgba(178, 51, 38, 0.2);
+    }
+
+    h1 {
+      margin: 14px 0 4px;
+      font-size: clamp(38px, 6vw, 62px);
+      font-family: 'Bebas Neue', 'Oswald', sans-serif;
+      letter-spacing: 0.08em;
+      line-height: 0.95;
+      text-transform: uppercase;
+      color: var(--border-dark);
+      text-shadow: 2px 2px 0 rgba(38, 35, 34, 0.12);
+    }
+
+    .subtitle {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .casefile {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 18px 0 10px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      border-bottom: 1.5px solid rgba(38, 35, 34, 0.2);
+      padding-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 18px 0 14px;
+      padding: 10px 16px;
+      background: var(--controls-bg);
+      border: 2px solid var(--border-dark);
+      border-radius: 8px;
+      box-shadow: 3px 3px 0 rgba(26, 27, 30, 0.4);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--controls-text);
+
+    }
+
+    .table-controls label strong {
+      color: #faf5ed;
+    }
+
+    .table-controls select {
+      background: var(--controls-select-bg);
+      color: var(--border-dark);
+      border: 1.5px solid var(--border-dark);
+      padding: 5px 12px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border-radius: 0;
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+      outline: none;
+    }
+
+    .table-controls select:focus {
+      border-color: var(--stamp-red);
+    }
+
+    #dataset-summary {
+      color: #d1c4b4;
+      font-style: italic;
+      font-size: 11.5px;
+      font-weight: 500;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border: 2px solid var(--border-dark);
+      border-radius: 8px;
+      box-shadow: 4px 4px 0 rgba(26, 27, 30, 0.3);
+      background: var(--row-base);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      text-align: left;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--table-border);
+      padding: 11px 12px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--navy-banner);
+      color: var(--navy-banner-text);
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      border-bottom: 2px solid #141211;
+      font-family: 'Oswald', 'IBM Plex Mono', sans-serif;
+    }
+
+    tbody tr {
+      background: var(--row-base);
+      transition: background 0.02s ease;
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--row-alt);
+    }
+
+    tbody tr:hover {
+      background: var(--row-hover);
+    }
+
+    .number {
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+      width: 48px;
+      text-align: center;
+      font-family: 'Oswald', monospace;
+    }
+
+    .sample-link {
+      display: inline-block;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .mugshot {
+      width: 68px;
+      height: 42px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 3px;
+      padding: 6px 4px 5px;
+      background: var(--mugshot-bg);
+      border: 1.5px solid var(--border-dark);
+      box-sizing: border-box;
+      transition: all 0.15s ease;
+      box-shadow: inset 1px 1px 2px rgba(38, 35, 34, 0.15);
+    }
+
+    .sample-link:hover .mugshot {
+      border-color: var(--mugshot-hover-border);
+      background: var(--mugshot-hover-bg);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(223, 170, 107, 0.35);
+    }
+
+    .mugshot i {
+      display: block;
+      width: 3.5px;
+      height: var(--h);
+      max-height: 30px;
+      background: var(--border-dark);
+      border-radius: 1px 1px 0 0;
+      transition: background 0.05s ease;
+    }
+
+    .sample-link:hover .mugshot i {
+      background: var(--tube-glow);
+    }
+
+    .suspect {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+
+    .small {
+      display: block;
+      font-size: 10px;
+      margin-top: 3px;
+      color: var(--ink-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .stamp {
+      display: inline-block;
+      padding: 3px 8px;
+      border: 1.5px solid #756a62;
+      color: #5c534c;
+      background: rgba(117, 106, 98, 0.12);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      transform: rotate(-3deg);
+      white-space: nowrap;
+      border-radius: 1px;
+      font-family: 'Oswald', sans-serif;
+    }
+
+    .week-divider td {
+      background: #191615;
+      color: #FAF5ED;
+      padding: 10px 14px;
+      font-weight: 700;
+      border: 1px solid var(--table-border);
+    }
+
+    .week-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: 'Oswald', sans-serif;
+    }
+
+    .week-title {
+      color: #c4b6a4;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+    }
+
+    .week-source {
+      color: #c4b6a4;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 2px dashed rgba(38, 35, 34, 0.35);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      font-weight: 500;
+    }
+
+    .signature {
+      margin-top: 28px;
+      text-align: right;
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      line-height: 1.35;
+    }
+
+    .signature strong {
+      display: inline-block;
+      font-family: 'Bebas Neue', 'Oswald', cursive, serif;
+      font-size: 30px;
+      transform: rotate(-3deg);
+      color: var(--stamp-red);
+      margin: 4px 0 2px;
+      letter-spacing: 0.06em;
+      line-height: 1;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 10px 40px;
+      }
+
+      .paper {
+        padding: 24px 14px 20px;
+        box-shadow: 6px 8px 0 #0d0e10;
+        outline-offset: -5px;
+      }
+
+      table {
+        font-size: 11px;
+      }
+
+      th,
+      td {
+        padding: 8px 6px;
+      }
+
+      .mugshot {
+        width: 50px;
+        height: 36px;
+        gap: 2px;
+      }
+
+      .mugshot i {
+        width: 2.5px;
+      }
+
+      .stamp {
+        font-size: 9px;
+        padding: 2px 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="paper">
+    <header class="header">
+      <div class="seal">Deezer's</div>
+      <h1>Normal Music</h1>
+      <div class="subtitle">Deezer's Top 50 Worldwide · Form N-432</div>
+    </header>
+    <!-- <div class="casefile">
+    </div> -->
+    <div class="table-controls">
+      <div>
+        <label for="week-filter"><strong>VIEW WEEK:</strong> </label>
+        <select id="week-filter">
+          <option value="all">All Weeks (Loading...)</option>
+        </select>
+      </div>
+      <div id="dataset-summary">
+        Loading dataset...
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align: center;">No.</th>
+            <th>Sample</th>
+            <th>Title</th>
+            <th>Artist</th>
+            <th>Duration</th>
+            <th>Tempo</th>
+            <th>ISRC / ID</th>
+            <th>Enrichment</th>
+          </tr>
+        </thead>
+        <tbody id="chart-table-body">
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 24px;">Loading chart dataset...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="footer">
+      <span>CHECK FOR MORE NEXT WEEK.</span>
+      <span>FORM N-432</span>
+    </div>
+    <div class="signature">
+      Authorized by the World Wide Web<br />
+      <strong>D. Schraedel</strong><br />
+    </div>
+  </main>
+  <script>
+    (function () {
+      function parseCSV(text) {
+        const lines = [];
+        let row = [''];
+        let inQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+          const c = text[i];
+          const next = text[i + 1];
+          if (c === '"') {
+            if (inQuotes && next === '"') {
+              row[row.length - 1] += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (c === ',' && !inQuotes) {
+            row.push('');
+          } else if ((c === '\r' || c === '\n') && !inQuotes) {
+            if (c === '\r' && next === '\n') i++;
+            if (row.length > 1 || row[0] !== '') lines.push(row);
+            row = [''];
+          } else {
+            row[row.length - 1] += c;
+          }
+        }
+        if (row.length > 1 || row[0] !== '') lines.push(row);
+        if (lines.length === 0) return [];
+        const headers = lines[0].map(h => h.trim());
+        return lines.slice(1).map(cols => {
+          const obj = {};
+          headers.forEach((h, idx) => {
+            obj[h] = (cols[idx] || '').trim();
+          });
+          return obj;
+        });
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatDuration(sec) {
+        const s = parseInt(sec, 10);
+        if (isNaN(s) || s <= 0) return '—';
+        const m = Math.floor(s / 60);
+        const rem = s % 60;
+        return m + ':' + String(rem).padStart(2, '0');
+      }
+
+      function getWaveformHeights(seedStr) {
+        let hash = 0;
+        const str = String(seedStr || 'track');
+        for (let i = 0; i < str.length; i++) {
+          hash = ((hash << 5) - hash) + str.charCodeAt(i);
+          hash |= 0;
+        }
+        const heights = [];
+        for (let i = 0; i < 9; i++) {
+          const pseudo = Math.abs(Math.sin(hash + (i + 1) * 1.618) * 18) + 8;
+          heights.push(Math.round(pseudo));
+        }
+        return heights;
+      }
+
+      function getIsoWeek(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return 'Unknown Week';
+        const target = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        const dayNr = target.getUTCDay() || 7;
+        target.setUTCDate(target.getUTCDate() + 4 - dayNr);
+        const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((target - yearStart) / 86400000) + 1) / 7);
+        return target.getUTCFullYear() + '-W' + String(weekNo).padStart(2, '0');
+      }
+
+      function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          timeZone: 'UTC'
+        });
+      }
+
+      function applyFilter() {
+        const weekSelect = document.getElementById('week-filter');
+        if (!weekSelect) return;
+        const selected = weekSelect.value;
+        const rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(tr => {
+          const rowWeek = tr.getAttribute('data-week');
+          if (selected === 'all' || rowWeek === selected) {
+            tr.style.display = '';
+          } else {
+            tr.style.display = 'none';
+          }
+        });
+      }
+
+      function renderDataset(records) {
+        const tbody = document.getElementById('chart-table-body');
+        const weekSelect = document.getElementById('week-filter');
+        const summary = document.getElementById('dataset-summary');
+        if (!tbody) return;
+
+        if (!records || records.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px;">No records found in CSV dataset.</td></tr>';
+          return;
+        }
+
+        // Group records by week in order
+        const weeksMap = new Map();
+        records.forEach(r => {
+          const weekId = getIsoWeek(r.scraped_at);
+          if (!weeksMap.has(weekId)) weeksMap.set(weekId, []);
+          weeksMap.get(weekId).push(r);
+        });
+
+        const weekKeys = Array.from(weeksMap.keys());
+
+        if (weekSelect) {
+          const currentVal = weekSelect.value;
+          weekSelect.innerHTML = '<option value="all">All Weeks (' + records.length + ' tracks)</option>';
+          weekKeys.forEach(w => {
+            const opt = document.createElement('option');
+            opt.value = w;
+            opt.textContent = w + ' (' + weeksMap.get(w).length + ' tracks)';
+            weekSelect.appendChild(opt);
+          });
+          if (currentVal && (currentVal === 'all' || weeksMap.has(currentVal))) {
+            weekSelect.value = currentVal;
+          }
+        }
+
+        if (summary) {
+          summary.textContent = records.length + ' records across ' + weekKeys.length + ' week' + (weekKeys.length > 1 ? 's' : '');
+        }
+
+        let html = '';
+        weekKeys.forEach(weekId => {
+          const list = weeksMap.get(weekId);
+          list.sort((a, b) => (parseInt(a.rank, 10) || 0) - (parseInt(b.rank, 10) || 0));
+          const sample = list[0];
+          const formattedDate = formatDate(sample.scraped_at);
+          const chartName = sample.chart || 'Global Top 50';
+
+          html += '<tr class="week-divider" data-week="' + escapeHtml(weekId) + '">';
+          html += '<td colspan="8"><div class="week-banner">';
+          html += '<span class="week-title">' + escapeHtml(weekId) + ' · Week of ' + escapeHtml(formattedDate) + '</span>';
+          html += '<span class="week-source">' + list.length + ' Tracks</span>';
+          html += '</div></td></tr>';
+
+          list.forEach(r => {
+            const rankNum = String(r.rank || '').padStart(3, '0');
+            const heights = getWaveformHeights(r.track_id || r.title);
+            const waveBars = heights.map(h => '<i style="--h:' + h + 'px"></i>').join('');
+            const duration = formatDuration(r.duration_seconds);
+            const bpm = r.deezer_bpm || r.bpm ? parseFloat(r.deezer_bpm || r.bpm).toFixed(1) + ' BPM' : '—';
+            const status = (r.enrichment_status || 'pending').toUpperCase();
+
+            const deezerUrl = r.track_id ? 'https://www.deezer.com/track/' + encodeURIComponent(r.track_id) : '';
+            const sampleCell = deezerUrl
+              ? '<a href="' + deezerUrl + '" target="_blank" rel="noopener noreferrer" title="Listen on Deezer" class="sample-link"><div class="mugshot" aria-label="waveform mugshot">' + waveBars + '</div></a>'
+              : '<div class="mugshot" aria-label="waveform mugshot">' + waveBars + '</div>';
+
+            html += '<tr data-week="' + escapeHtml(weekId) + '">';
+            html += '<td class="number">' + rankNum + '</td>';
+            html += '<td>' + sampleCell + '</td>';
+            html += '<td><span class="suspect">' + escapeHtml(r.title) + '</span></td>';
+            html += '<td>' + escapeHtml(r.artist) + '</td>';
+            html += '<td>' + duration + '<span class="small">' + escapeHtml(r.duration_seconds) + 's</span></td>';
+            html += '<td>' + bpm + '</td>';
+            html += '<td><span>' + escapeHtml(r.isrc || '—') + '</span><span class="small">ID: ' + escapeHtml(r.track_id || '—') + '</span></td>';
+            html += '<td><span class="stamp">' + escapeHtml(status) + '</span></td>';
+            html += '</tr>';
+          });
+        });
+
+        tbody.innerHTML = html;
+        applyFilter();
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        const weekSelect = document.getElementById('week-filter');
+        if (weekSelect) {
+          weekSelect.addEventListener('change', applyFilter);
+        }
+
+        const tbody = document.getElementById('chart-table-body');
+
+        // Dynamically fetch CSV dataset (cache-busting query to ensure newest weekly data)
+        fetch('./data/chart_dataset.csv?t=' + Date.now())
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status + ': Failed to load data/chart_dataset.csv');
+            return res.text();
+          })
+          .then(csvText => {
+            const records = parseCSV(csvText.trim());
+            renderDataset(records);
+          })
+          .catch(err => {
+            if (tbody) {
+              tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--stamp-red, #a1261e);">' +
+                '<b>Error loading dataset:</b> ' + escapeHtml(err.message) +
+                '<br><span class="small" style="margin-top: 8px;">Ensure data/chart_dataset.csv is accessible (e.g. served via a local web server).</span>' +
+                '</td></tr>';
+            }
+          });
+      });
+    })();
+  </script>
+</body>
+
+</html>

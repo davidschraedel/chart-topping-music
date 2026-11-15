@@ -8,16 +8,16 @@ Standards and conventions for the **Chart-topping Music Data Collection** codeba
 
 - **TypeScript Strict Mode**: Enable strict null checks and avoid `any`. Define explicit interfaces for chart entries and enrichment records.
 - **Fail-Loud Data Pipelines**: If the chart fetch returns fewer than ~40 rows or has missing critical fields, fail fast and write nothing.
-- **Two-Step Independence**: Step 2 (Tunebat enrichment) failure must **never** block Step 1 (chart data). Chart rows are always written to the CSV.
+- **Future-Proof Two-Step Architecture**: Any future audio feature enrichment must never block base chart storage. Chart rows are always written to the CSV regardless of enrichment availability.
 - **Append-Only Immutability**: Historical rows in `data/chart_dataset.csv` are never overwritten. Runs are deduplicated by calendar week and chart name unless `--force` is provided.
 
 ---
 
 ## 2. Enrichment & Matching Rules
 
-- **CSV-as-Cache**: Load existing CSV records into memory before triggering any Playwright lookups. Key cached records by `track_id` and `isrc`.
+- **CSV-as-Cache**: Load existing CSV records into memory before triggering any external network lookups. Key cached records by `track_id` and `isrc`.
 - **Matching Priority**:
-  1. Prefer exact identifier matches (ISRC or Spotify ID if supported).
+  1. Prefer exact identifier matches (ISRC or Deezer track ID).
   2. Fall back to normalized title and artist comparison (lowercase, strip "feat.", parentheticals, and punctuation).
 - **Match Confidence**: Record `match_confidence` (`exact_id`, `normalized_name`, or `fuzzy`). If ambiguous, mark `not_found` and keep the chart row. Wrong stats are worse than empty stats.
 - **Retry Cap**: Increment `enrichment_attempts`. Never retry after 3 failed attempts.
@@ -43,8 +43,8 @@ export interface ChartEntry {
   duration_seconds: number;       // Duration in integer seconds
   deezer_bpm?: number;            // Baseline BPM from Deezer track lookup
 
-  // Audio stats (from Tunebat when available, else empty)
-  bpm?: number;                   // BPM reported by Tunebat
+  // Audio stats (reserved for future API enrichment, empty in current V1)
+  bpm?: number;                   // BPM reported by enrichment provider
   key?: string;                   // Musical key (e.g. 'C Major', 'F# Minor')
   mode?: string;                  // 'Major' | 'Minor'
   energy?: number;                // Perceptual energy score
@@ -54,7 +54,7 @@ export interface ChartEntry {
 
   // Enrichment bookkeeping
   enrichment_status: EnrichmentStatus;
-  enrichment_source?: string;     // 'tunebat' (or blank if pending)
+  enrichment_source?: string;     // Enrichment provider name (or blank if pending)
   enrichment_date?: string;       // ISO 8601 timestamp of enrichment
   match_confidence?: MatchConfidence;
   enrichment_attempts: number;    // Number of lookup attempts (cap at 3)
@@ -63,15 +63,11 @@ export interface ChartEntry {
 
 ---
 
-## 4. Playwright & Polite Visitor Rules
+## 4. Bot Defense & API Integration Rules
 
-- **Element Waiting**: Wait for specific table or metric elements to appear; never rely on `networkidle` or hardcoded `waitForTimeout()`.
-- **Polite Delays**: Apply random 3–8 second delays between Tunebat track lookups.
-- **No Anti-Bot Evasion**: Do not use stealth plugins, proxy rotation, or CAPTCHA solving. If a CAPTCHA or 403 block is encountered:
-  - Terminate browser enrichment immediately.
-  - Mark un-enriched songs as `pending`.
-  - Save a failure screenshot to `data/raw/tunebat/<date>_blocked.png`.
-  - Write chart rows safely to CSV and exit cleanly.
+- **Strict No-Evasion Policy**: Do not use stealth plugins, proxy rotation, or CAPTCHA solving. If a platform requires automated access evasion, it is dropped from the pipeline.
+- **REST APIs Preferred**: Any future enrichment should integrate via direct, structured REST APIs using standard `fetch()`, avoiding browser automation overhead.
+- **Fail-Safe Decoupling**: If an external enrichment API fails or experiences downtime, chart entries must still be safely stored with `enrichment_status = 'pending'`.
 
 ---
 
