@@ -47,15 +47,16 @@ Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npx t
 7. **Phase 7: Scheduling & Cloud Automation**: Set up a free weekly GitHub Actions cron workflow to run the pipeline unattended in the cloud and auto-commit `data/chart_dataset.csv` back to the repository (with local macOS `launchd` / `cron` documented as a fallback).
 
 ## 6. State
-- **Current Milestone**: Phase 6 - Multi-Run Verification (Complete) -> Ready for Phase 7 (Scheduling)
+- **Current Milestone**: V1 Pipeline Complete (Phases 1–7 Implemented & Verified)
 - **Progress**:
   1. **Phase 1 (Feasibility Gates)**: Completed.
   2. **Phase 2 (Chart Fetcher & Base CSV)**: Completed.
   3. **Phase 3 (Tunebat Parser Probe)**: Skipped due to site-wide Cloudflare bot blocks.
   4. **Phase 4 (CSV-as-Cache & Metadata Reuse)**: Completed.
-  5. **Phase 5 (Resilient Error Handling & Diff Report)**: Completed. Network error protection implemented; differential reporting (`buildDiffReport`, `printReport`) logs new entries, returning songs, and drop-offs.
-  6. **Phase 6 (Multi-Run Simulation & Verification)**: Completed. Verified clean fresh run, duplicate week suppression, forced re-runs, and simulated consecutive weeks (`2026-W46` → `2026-W47`).
-- **Verification**: All scenarios pass end-to-end with verified diff reporting and CSV append immutability.
+  5. **Phase 5 (Resilient Error Handling & Diff Report)**: Completed.
+  6. **Phase 6 (Multi-Run Simulation & Verification)**: Completed.
+  7. **Phase 7 (Scheduling & Cloud Automation)**: Completed. Configured `.github/workflows/weekly-chart.yml` with dual-run cron (`0 14 * * 1,3`), automated catch-up logic, and auto-commit back to repository; documented in `README.md`.
+- **Verification**: Complete end-to-end pipeline tested locally and ready for GitHub Actions unattended cloud execution.
 
 ---
 
