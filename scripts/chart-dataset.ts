@@ -11,6 +11,8 @@ import * as dotenv from 'dotenv';
 import { fetchDeezerChart } from '../src/deezer';
 import { loadCsv, appendCsv, getIsoWeekId, hasDuplicateWeek } from '../src/csv';
 import { buildCache } from '../src/cache';
+import { buildDiffReport, printReport } from '../src/report';
+import { ChartEntry } from '../src/types';
 
 dotenv.config();
 
@@ -18,7 +20,7 @@ const CSV_PATH = path.resolve(process.cwd(), 'data', 'chart_dataset.csv');
 
 async function main(): Promise<void> {
   const isForce = process.argv.includes('--force');
-  const now = new Date();
+  const now = process.env.SIMULATE_DATE ? new Date(process.env.SIMULATE_DATE) : new Date();
   const currentWeekId = getIsoWeekId(now);
   const chartSource = 'deezer';
 
@@ -27,6 +29,9 @@ async function main(): Promise<void> {
   console.log(`Target Week ID: ${currentWeekId}`);
   if (isForce) {
     console.log('Mode: --force enabled (week-deduplication guard bypassed)');
+  }
+  if (process.env.SIMULATE_DATE) {
+    console.log(`Simulation: SIMULATE_DATE is active (${process.env.SIMULATE_DATE})`);
   }
 
   // 1. Load existing CSV data to verify history and enforce deduplication
@@ -46,36 +51,63 @@ async function main(): Promise<void> {
     return;
   }
 
-  // 3. Fetch Deezer Chart and per-track details (ISRC, BPM), utilizing cache
+  // 3. Fetch Deezer Chart and per-track details (ISRC, BPM), wrapped for resilient error handling
   console.log('\n--- Step 1: Fetching Chart Data ---');
-  const { entries, rawFilePath, cacheHits, cacheMisses } = await fetchDeezerChart({ cache });
+  let entries: ChartEntry[];
+  let rawFilePath: string | undefined;
+  let cacheHits = 0;
+  let cacheMisses = 0;
+
+  try {
+    const result = await fetchDeezerChart({ cache });
+    entries = result.entries;
+    rawFilePath = result.rawFilePath;
+    cacheHits = result.cacheHits;
+    cacheMisses = result.cacheMisses;
+
+    // Override scraped_at if simulating a specific date
+    if (process.env.SIMULATE_DATE) {
+      entries.forEach(e => {
+        e.scraped_at = now.toISOString();
+      });
+    }
+  } catch (fetchErr) {
+    console.error('\n❌ Step 1 (Deezer Fetch) Failed. Aborting without modifying CSV.');
+    console.error(`Error details: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`);
+    process.exit(1);
+  }
 
   console.log(`Successfully retrieved and validated ${entries.length} chart entries.`);
 
   // 4. Append rows to CSV
   console.log('\n--- Step 2: Storing to Dataset ---');
-  await appendCsv(CSV_PATH, entries);
-  console.log(`Appended ${entries.length} rows to ${CSV_PATH}`);
+  try {
+    await appendCsv(CSV_PATH, entries);
+    console.log(`Appended ${entries.length} rows to ${CSV_PATH}`);
+  } catch (csvErr) {
+    console.error('\n❌ Step 2 (CSV Storage) Failed.');
+    console.error(`Error details: ${csvErr instanceof Error ? csvErr.message : String(csvErr)}`);
+    process.exit(1);
+  }
 
-  // 5. Output Run Summary
-  console.log('\n=== Run Summary ===');
+  // 5. Output Diff Report and Run Summary
+  const diffReport = buildDiffReport(existingRows, entries, {
+    weekId: currentWeekId,
+    cacheHits,
+    freshLookups: cacheMisses,
+  });
+
+  printReport(diffReport);
+
+  console.log('\n=== Storage Summary ===');
   console.log(`Status: SUCCESS`);
-  console.log(`Week ID:          ${currentWeekId}`);
-  console.log(`Timestamp:        ${entries[0]?.scraped_at || now.toISOString()}`);
-  console.log(`Rows Written:     ${entries.length}`);
-  console.log(`Cache Hits:       ${cacheHits}`);
-  console.log(`Fresh Lookups:    ${cacheMisses}`);
   console.log(`Raw Capture:      ${rawFilePath || 'n/a'}`);
   console.log(`Total Dataset:    ${existingRows.length + entries.length} rows`);
-
-  console.log('\nTop 5 Tracks Written:');
-  entries.slice(0, 5).forEach(e => {
-    console.log(`  #${e.rank} "${e.title}" — ${e.artist} (ISRC: ${e.isrc || 'n/a'}, Duration: ${e.duration_seconds}s)`);
-  });
 }
 
 main().catch(err => {
-  console.error('\n❌ Pipeline Error:', err instanceof Error ? err.message : String(err));
+  console.error('\n❌ Unhandled Pipeline Error:', err instanceof Error ? err.message : String(err));
   process.exit(1);
 });
+
 
