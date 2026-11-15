@@ -39,9 +39,10 @@ Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npm r
 5. **Phase 5: Resilient Error Handling & Diff Report**: Add failure recovery, per-run diff report (movers, new entries, drop-offs), and run summary.
 6. **Phase 6: Multi-Run Simulation & Verification**: Verify caching across repeated runs and simulate Step 2 failure.
 7. **Phase 7: Scheduling & Cloud Automation**: Set up a free weekly GitHub Actions cron workflow to run the pipeline unattended in the cloud and auto-commit `data/chart_dataset.csv` back to the repository (with local macOS `launchd` / `cron` documented as a fallback).
+8. **Phase 8: Web Dashboard & GitHub Pages**: Dynamic client-side web viewer (`index.html` and `code.html`) displaying weekly snapshots in order, linking waveforms to Deezer previews, and deploying via GitHub Pages.
 
 ## 6. State
-- **Current Milestone**: V1 Pipeline Complete (Phases 1–7 Implemented & Verified)
+- **Current Milestone**: V1 Pipeline & Web Dashboard Complete (Phases 1–8 Implemented & Verified)
 - **Progress**:
   1. **Phase 1 (Feasibility Gates)**: Completed.
   2. **Phase 2 (Chart Fetcher & Base CSV)**: Completed.
@@ -50,6 +51,7 @@ Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npm r
   5. **Phase 5 (Resilient Error Handling & Diff Report)**: Completed.
   6. **Phase 6 (Multi-Run Simulation & Verification)**: Completed.
   7. **Phase 7 (Scheduling & Cloud Automation)**: Completed. Configured `.github/workflows/weekly-chart.yml` with dual-run cron (`0 14 * * 1,3`), automated catch-up logic, and auto-commit back to repository; documented in `README.md`.
+  8. **Phase 8 (Web Dashboard & GitHub Pages)**: Completed. Dynamic, dependency-free viewer (`index.html` / `code.html`) reading CSV data in order week-by-week with `.nojekyll` enabled for GitHub Pages.
 - **Verification**: Complete end-to-end pipeline tested locally and ready for GitHub Actions unattended cloud execution.
 
 ---
