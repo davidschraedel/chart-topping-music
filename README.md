@@ -131,15 +131,38 @@ Each row in `data/chart_dataset.csv` records:
 ## Scheduling
 
 ### Primary (Recommended): GitHub Actions (Cloud & Free)
-Runs automatically in the cloud so your computer can be asleep or turned off:
-- **100% Free**: Scheduled via a GitHub Actions `cron` workflow (~2–3 minutes/week, using `< 15` of the 2,000 free minutes/month on private repos).
-- **Auto-Sync**: Automatically executes the weekly pipeline and commits the newly appended `data/chart_dataset.csv` directly back to your repository.
-- **Zero Local Maintenance**: No need to keep your Mac awake or manage local background daemons.
+Runs completely unattended in the cloud so your local computer can be asleep or turned off:
+- **Automatic Dual Schedule**:
+  - **Mondays at 14:00 UTC (Primary)**: Captures the new weekly chart snapshot.
+  - **Wednesdays at 14:00 UTC (Automatic Catch-Up)**: Acts as a safety net. If Monday's run succeeded, the Wednesday run sees this week is already captured and harmlessly skips (0 duplicate writes). If Monday failed or Deezer had a network outage, Wednesday catches up and commits the missing chart.
+- **Auto-Sync to Repo**: Executes the collector and commits the newly appended `data/chart_dataset.csv` and raw JSON snapshots directly back to your repository using `github-actions[bot]`.
+- **Failure Notifications**: By default, GitHub automatically emails you if any scheduled workflow fails, and flags the Actions tab with a red failure badge.
+- **One-Click Manual Trigger**: You can run the workflow manually at any time by going to **Actions** $\rightarrow$ **Weekly Chart Collector** $\rightarrow$ **Run workflow**.
+- **100% Free**: Uses standard Node.js without browser overhead; runs in ~15 seconds per week (using `< 2` of the 2,000 free minutes/month on GitHub private repos).
+
+#### GitHub Repository Variables (Optional)
+To customize parameters without modifying code, go to your GitHub repository:
+**Settings** $\rightarrow$ **Secrets and variables** $\rightarrow$ **Actions** $\rightarrow$ **Variables tab** $\rightarrow$ **New repository variable**:
+- `CHART_SOURCE`: e.g. `https://api.deezer.com/chart/0/tracks`
+- `CHART_REGION`: e.g. `Global`
+- `MAX_ROWS`: e.g. `50`
+
+*(If omitted, sensible defaults are automatically used.)*
+
+---
 
 ### Backup: Local macOS `cron` or `launchd`
-If a target website blocks cloud/datacenter IP addresses, run locally on your own machine instead:
-- Scheduled using standard macOS `launchd` or `cron`.
-- *Note: Your Mac must be awake and powered on at the scheduled run time.*
+If you prefer running locally on your own machine instead of the cloud:
+
+```cron
+# Edit crontab:
+crontab -e
+
+# Run every Monday at 9:00 AM:
+0 9 * * 1 cd /path/to/chart-topping-music && npm run scrape:charts >> cron.log 2>&1
+```
+
+*Note: Your Mac must be awake and powered on at the scheduled run time.*
 
 ---
 

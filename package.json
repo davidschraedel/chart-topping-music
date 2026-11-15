@@ -1,0 +1,37 @@
+{
+  "name": "chart-topping-music",
+  "version": "1.0.0",
+  "description": "A standalone TypeScript script that periodically captures snapshots of top music charts along with song audio characteristics (BPM, key, mode, energy, danceability, valence, acousticness).",
+  "scripts": {
+    "scrape:charts": "npx tsx scripts/chart-dataset.ts",
+    "gate1": "npx tsx scripts/feasibility/gate1-deezer-chart.ts",
+    "gate2": "npx tsx scripts/feasibility/gate2-deezer-track.ts",
+    "gate3": "npx tsx scripts/feasibility/gate3-tunebat-probe.ts",
+    "gate4": "npx tsx scripts/feasibility/gate4-tunebat-terms.ts",
+    "gate3b": "npx tsx scripts/feasibility/gate3b-tunebat-info-probe.ts",
+    "gate3c": "npx tsx scripts/feasibility/gate3c-chosic-probe.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidschraedel/chart-topping-music.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/davidschraedel/chart-topping-music/issues"
+  },
+  "homepage": "https://github.com/davidschraedel/chart-topping-music#readme",
+  "dependencies": {
+    "csv-parse": "^7.0.3",
+    "csv-stringify": "^6.9.0",
+    "dotenv": "^18.0.10",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "playwright": "^1.65.1"
+  }
+}
