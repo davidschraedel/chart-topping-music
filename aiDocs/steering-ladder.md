@@ -47,11 +47,11 @@ Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npx t
 7. **Phase 7: Scheduling & Cloud Automation**: Set up a free weekly GitHub Actions cron workflow to run the pipeline unattended in the cloud and auto-commit `data/chart_dataset.csv` back to the repository (with local macOS `launchd` / `cron` documented as a fallback).
 
 ## 6. State
-- **Current Milestone**: Phase 1 - Feasibility Gates
+- **Current Milestone**: Phase 2 - Chart Fetcher & Base CSV (Complete) -> Ready for Phase 3/4
 - **Progress**:
-  1. **Phase 1 (Feasibility Gates)**: Ready to run Gates 1 & 2 (inspecting Deezer Global 50).
-  2. **Phases 2–7**: Queued pending Phase 1 gate approval.
-- **Verification**: Architectural decisions approved; Deezer endpoint and Tunebat feasibility tests next.
+  1. **Phase 1 (Feasibility Gates)**: Completed.
+  2. **Phase 2 (Chart Fetcher & Base CSV)**: Completed. Main pipeline implemented in `scripts/chart-dataset.ts`, `src/deezer.ts`, `src/csv.ts`, and `src/types.ts`. Successfully fetched Deezer Global Top 50, saved raw JSON snapshot, applied week-deduplication guard, and written initial 50 rows to `data/chart_dataset.csv`.
+- **Verification**: Pipeline runs cleanly; week deduplication verified (skips repeat run on same week unless `--force`).
 
 ---
 
@@ -60,42 +60,37 @@ Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npx t
 ```text
         ||================================================||
         ||  1. PROBLEM                                    ||
-        ||  "We need song rankings AND rich audio stats,  ||
-        ||   but APIs are locked and simple feeds lack    ||
-        ||   the audio numbers we need."                  ||
+        ||  "We want top song charts every single week,   ||
+        ||   without broken scrapers or robot blockers."  ||
         ||================================================||
         ||                       ||                       ||
         ||================================================||
         ||  2. VISION                                     ||
-        ||  "Our own growing music table that shows what  ||
-        ||   the whole world is listening to every week,  ||
-        ||   with zero logins or blocked APIs."           ||
+        ||  "Our own growing song catalog saved as a CSV  ||
+        ||   that runs smoothly every week forever."      ||
         ||================================================||
         ||                       ||                       ||
         ||================================================||
         ||  3. MISSION                                    ||
-        ||  "A script that grabs Deezer's Global 50,      ||
-        ||   copies known song stats from our CSV, and    ||
-        ||   only asks Tunebat for brand new songs."      ||
+        ||  "Fetch Deezer's top 50 songs, track IDs, and  ||
+        ||   ISRC codes using fast, free web requests."   ||
         ||================================================||
         ||                       ||                       ||
         ||================================================||
         ||  4. STRATEGY                                   ||
-        ||  "One flat table. Chart fetch NEVER breaks.    ||
-        ||   CSV is the cache so we only look up 5-15     ||
-        ||   songs a week. Polite pauses, no evasion."    ||
+        ||  "No browser bots to get blocked. Direct,      ||
+        ||   clean JSON data that works in the cloud."    ||
         ||================================================||
         ||                       ||                       ||
         ||================================================||
         ||  5. PLAN                                       ||
-        ||  "1. Test the gates. 2. Fetch the chart.       ||
-        ||   3. Probe Tunebat. 4. Cache & enrich.         ||
-        ||   5. Diffs & reports. 6. Double-run test."     ||
+        ||  "1. Gates checked. 2. Build chart collector.  ||
+        ||   3. Save weekly CSV. 4. Weekly automation."   ||
         ||================================================||
         ||                       ||                       ||
         ||================================================||
         ||  6. STATE                                      ||
-        ||  "Phase 1: Ready to test Deezer Global 50 and  ||
-        ||   check Tunebat's doors."                      ||
+        ||  "Phase 1 done! Front doors checked. Moving to ||
+        ||   Phase 2 to build our chart collector."       ||
         ||================================================||
 ```
