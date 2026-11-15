@@ -130,7 +130,16 @@ Each row in `data/chart_dataset.csv` records:
 
 ## Scheduling
 
-Run manually until the scraper is verified and stable. Once stable, schedule via macOS `launchd` or `cron` for unattended weekly execution. (Note: your Mac must be awake at the scheduled run time).
+### Primary (Recommended): GitHub Actions (Cloud & Free)
+Runs automatically in the cloud so your computer can be asleep or turned off:
+- **100% Free**: Scheduled via a GitHub Actions `cron` workflow (~2–3 minutes/week, using `< 15` of the 2,000 free minutes/month on private repos).
+- **Auto-Sync**: Automatically executes the weekly pipeline and commits the newly appended `data/chart_dataset.csv` directly back to your repository.
+- **Zero Local Maintenance**: No need to keep your Mac awake or manage local background daemons.
+
+### Backup: Local macOS `cron` or `launchd`
+If a target website blocks cloud/datacenter IP addresses, run locally on your own machine instead:
+- Scheduled using standard macOS `launchd` or `cron`.
+- *Note: Your Mac must be awake and powered on at the scheduled run time.*
 
 ---
 

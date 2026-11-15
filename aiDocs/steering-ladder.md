@@ -44,7 +44,7 @@ Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npx t
 4. **Phase 4: CSV-as-Cache & Capped Enrichment**: Implement cache lookup and capped Playwright enrichment.
 5. **Phase 5: Resilient Error Handling & Diff Report**: Add failure recovery, per-run diff report (movers, new entries, drop-offs), and run summary.
 6. **Phase 6: Multi-Run Simulation & Verification**: Verify caching across repeated runs and simulate Step 2 failure.
-7. **Phase 7: Scheduling Documentation**: Document manual execution and optional macOS `launchd` / `cron` setup.
+7. **Phase 7: Scheduling & Cloud Automation**: Set up a free weekly GitHub Actions cron workflow to run the pipeline unattended in the cloud and auto-commit `data/chart_dataset.csv` back to the repository (with local macOS `launchd` / `cron` documented as a fallback).
 
 ## 6. State
 - **Current Milestone**: Phase 1 - Feasibility Gates
