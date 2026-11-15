@@ -45,6 +45,7 @@ chart-topping-music/
 ## 4. Technology Stack
 
 - **Runtime & Language**: Node.js, TypeScript
-- **Browser Automation**: Playwright (Chromium)
+- **Data Retrieval**: Native `fetch` (Deezer Public API)
 - **Data Serialization**: `csv-parse`, `csv-stringify`
+- **Automation & Scheduling**: GitHub Actions (`cron` + `workflow_dispatch`)
 - **Configuration**: `dotenv`

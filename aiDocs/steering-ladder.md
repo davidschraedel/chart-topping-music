@@ -9,28 +9,22 @@ Identifying music trends and contrarian creative opportunities requires pairing 
 A reliable, automated, and friction-free weekly data collection pipeline that creates the owner's own high-density music dataset—uniting Global 50 chart positions with deep musical features in a single flat, append-only CSV—with zero gated API keys, logins, or imported third-party datasets. Over time, feeding this growing CSV to an LLM reveals what sounds dominate the charts, what sonic spaces are underserved, and where contrarian creative opportunities exist for music producers and songwriters.
 
 ## 3. Mission
-Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npx tsx scripts/chart-dataset.ts`) that executes weekly to fetch Deezer's public Global 50 chart (Step 1, plain HTTP), enriches new tracks with audio stats from Tunebat via Playwright (Step 2), and appends clean rows to `data/chart_dataset.csv`. The script uses the CSV itself as an in-memory cache so that persistent charting songs are never re-scraped, reducing steady-state Tunebat requests to only ~5–15 per week. Step 2 failure must never break Step 1.
+Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npm run scrape:charts`) that executes weekly to fetch Deezer's public Global 50 chart (plain HTTP), uses the CSV itself as an in-memory cache to reuse known track metadata (ISRC, duration, BPM) without redundant requests, and appends clean rows to `data/chart_dataset.csv`. The schema preserves audio feature columns for a future direct REST API enrichment phase, while the active pipeline runs browser-free and fully automated via GitHub Actions.
 
 ## 4. Strategy (Guiding Policy)
 - **Own Dataset, Zero Imports**: Built entirely from scratch via weekly runs. No Kaggle, no Hugging Face, no historical backfill. Current weekly trends matter most.
-- **ONE Flat CSV**: All chart and audio data reside together in `data/chart_dataset.csv`. No database, no second table, no joins.
+- **ONE Flat CSV**: All chart and metadata reside together in `data/chart_dataset.csv`. No database, no second table, no joins.
 - **Append-Only Immutability**: One row per chart entry per run. Never overwrite old rows. Never duplicate a calendar week unless `--force` is passed.
-- **Two-Step Decoupled Pipeline**:
-  - *Step 1 (Chart fetch)*: Plain HTTP request to Deezer's public chart (`https://api.deezer.com/chart/0/tracks?limit=50`). No browser overhead. Includes track metadata, duration, ISRC, and `deezer_bpm`.
-  - *Step 2 (Enrichment)*: Playwright browser lookup on Tunebat for audio stats. **Step 2 must never block Step 1**. If Tunebat fails or is blocked, chart rows are still written with `enrichment_status = pending` or `error`.
-- **The CSV as the Cache**: Load existing CSV rows into memory by `track_id` / `isrc`. If stats exist from an earlier week, copy them into the new row (`enrichment_status = cached`) with zero web requests.
-- **Polite Visitor Policy & Bot Defense**:
-  - Small enrichment cap per run (default 25).
-  - Random 3–8 second pauses between Tunebat lookups.
-  - Sequential browser, standard user agent, element waiting (no fixed sleeps).
-  - Stop immediately if a CAPTCHA, 403, or block appears. Never bypass or evade anti-bot gates. Mark remaining songs `pending` and write chart rows safely.
+- **Direct, Browser-Free Pipeline**:
+  - *Chart fetch*: Plain HTTP requests to Deezer's public API (`https://api.deezer.com`). No browser overhead, no Cloudflare bottlenecks. Includes track metadata, duration, ISRC, and `deezer_bpm`.
+  - *Future-Proof Schema*: Preserves `bpm`, `key`, `energy`, `danceability`, `valence`, `acousticness` columns so a future REST API can plug in without altering table structure.
+- **The CSV as the Cache**: Load existing CSV rows into memory by `track_id` / `isrc`. If a song charting this week was already seen, reuse its metadata (`enrichment_status = cached`) with zero extra network requests.
 - **Source Verification & Trade-off Landscape**:
   | Source | Gives You | Missing | Role in Pipeline |
   | :--- | :--- | :--- | :--- |
-  | **Deezer Public API** (`api.deezer.com/chart/0/tracks`) | Global 50 rank, title, artist, duration, ISRC, BPM | Energy, danceability, valence | **Step 1 primary source**. Free, unauthenticated JSON, no browser needed. |
-  | **Tunebat** | Audio stats (BPM, key, mode, energy, danceability, valence, acousticness) | Public API | **Step 2 enrichment source**. Scraped via Playwright only for new, uncached tracks. |
-  | **Apple Music RSS** | Top songs by country (JSON) | All audio stats | Evaluated; Deezer preferred for Global scope & native BPM/ISRC. |
-  | **Billboard** | Rank, artist, title, weeks on chart | All audio stats | Excluded: restrictive terms, anti-bot protection, no audio stats. |
+  | **Deezer Public API** (`api.deezer.com/chart/0/tracks`) | Global 50 rank, title, artist, duration, ISRC, BPM | Energy, danceability, valence | **Primary source**. Free, unauthenticated JSON, no browser needed. |
+  | **Tunebat / Chosic** | Audio stats | Public API | **Evaluated & dropped**. Blocked by Cloudflare Turnstile bot challenges; scraping abandoned per policy. |
+  | **Future REST API** | Audio stats (BPM, key, energy, etc.) | V1 inclusion | **Planned / Optional**. Can plug directly into HTTP pipeline at a later milestone. |
   | **Spotify Web API** | Audio features (historically) | Closed to new apps | Deprecated / returns `403 Forbidden` for new developer apps since Nov 2024. |
 
 ## 5. Plan (Phased Milestones)
@@ -95,7 +89,7 @@ Build a standalone TypeScript script (`scripts/chart-dataset.ts`, run via `npx t
         ||                       ||                       ||
         ||================================================||
         ||  6. STATE                                      ||
-        ||  "Phase 1 done! Front doors checked. Moving to ||
-        ||   Phase 2 to build our chart collector."       ||
+        ||  "V1 pipeline complete! Deezer + cache +       ||
+        ||   cloud actions all running smoothly."         ||
         ||================================================||
 ```
